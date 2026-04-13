@@ -27,7 +27,14 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.example.pointsystem.application.event
+        spring.json.value.default.type: com.example.pointsystem.application.event.PointChangedEvent
 
 app:
   kafka:
     point-topic: point-events
+    ledger-consumer-group: point-ledger
