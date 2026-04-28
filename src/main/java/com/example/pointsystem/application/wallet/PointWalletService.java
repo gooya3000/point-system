@@ -6,11 +6,11 @@ import com.example.pointsystem.application.policy.PointPolicyService;
 import com.example.pointsystem.domain.policy.PointPolicy;
 import com.example.pointsystem.domain.wallet.*;
 import com.example.pointsystem.infrastructure.redis.MemberPointLock;
+import com.example.pointsystem.infrastructure.redis.PointWalletCacheReader;
 import com.example.pointsystem.infrastructure.redis.PointUseIdempotencyManager;
 import com.example.pointsystem.infrastructure.redis.RedisCacheConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +29,7 @@ public class PointWalletService {
     private final PointUsageRepository pointUsageRepository;
     private final PointPolicyService pointPolicyService;
     private final PointUseIdempotencyManager pointUseIdempotencyManager;
+    private final PointWalletCacheReader pointWalletCacheReader;
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /**
@@ -67,10 +68,11 @@ public class PointWalletService {
      * @return PointWallet
      */
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = RedisCacheConfig.POINT_WALLET_CACHE, key = "#memberId")
     public PointWallet getWallet(Long memberId) {
-        return pointWalletRepository.findByMemberId(memberId)
-                .orElseGet(() -> PointWallet.createWallet(memberId));
+        return pointWalletCacheReader.getOrLoad(memberId,
+                () -> pointWalletRepository.findByMemberId(memberId)
+                        .orElseGet(() -> PointWallet.createWallet(memberId))
+        );
     }
 
     /**

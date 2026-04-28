@@ -1,11 +1,10 @@
 package com.example.pointsystem.application.policy;
 
 import com.example.pointsystem.domain.policy.PointPolicy;
-import com.example.pointsystem.infrastructure.redis.RedisCacheConfig;
 import com.example.pointsystem.infrastructure.jpa.policy.PointPolicyEntity;
 import com.example.pointsystem.infrastructure.jpa.policy.PointPolicyJpaRepository;
+import com.example.pointsystem.infrastructure.redis.PointPolicyCacheReader;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,13 +17,17 @@ public class PointPolicyService {
     private static final long DEFAULT_POLICY_ID = 1L;
 
     private final PointPolicyJpaRepository jpaRepository;
+    private final PointPolicyCacheReader pointPolicyCacheReader;
 
     /**
      * 포인트 정책을 조회합니다.
      * @return PointPolicy
      */
-    @Cacheable(cacheNames = RedisCacheConfig.POINT_POLICY_CACHE, key = "'current'")
     public PointPolicy getCurrentPolicy() {
+        return pointPolicyCacheReader.getCurrentPolicy(this::loadCurrentPolicy);
+    }
+
+    private PointPolicy loadCurrentPolicy() {
         PointPolicyEntity entity = jpaRepository.findById(DEFAULT_POLICY_ID)
                 .orElseThrow(() -> new IllegalStateException("포인트 정책이 설정되어 있지 않습니다."));
 

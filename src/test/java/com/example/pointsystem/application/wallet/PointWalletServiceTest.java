@@ -3,6 +3,7 @@ package com.example.pointsystem.application.wallet;
 import com.example.pointsystem.application.event.PointChangedEvent;
 import com.example.pointsystem.application.policy.PointPolicyService;
 import com.example.pointsystem.domain.wallet.*;
+import com.example.pointsystem.infrastructure.redis.PointWalletCacheReader;
 import com.example.pointsystem.infrastructure.redis.PointUseIdempotencyManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,8 @@ class PointWalletServiceTest {
     @Mock
     private PointUseIdempotencyManager pointUseIdempotencyManager;
     @Mock
+    private PointWalletCacheReader pointWalletCacheReader;
+    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
 
     private PointWalletService service;
@@ -45,6 +48,7 @@ class PointWalletServiceTest {
                 pointUsageRepository,
                 pointPolicyService,
                 pointUseIdempotencyManager,
+                pointWalletCacheReader,
                 applicationEventPublisher
         );
     }
